@@ -1,0 +1,23 @@
+{
+  "name": "ayomama-backend",
+  "version": "1.0.0",
+  "description": "Backend for Ayomama maternal health app",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "dotenv": "^17.2.3",
+    "express": "^4.19.0",
+    "jsonwebtoken": "^9.0.0",
+    "mongoose": "^7.6.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  },
+  "author": "",
+  "license": "MIT"
+}
