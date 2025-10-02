@@ -36,5 +36,56 @@ const getVisits = async (req, res) => {
     }
 }
 
+const getVisitById = async (req, res) => {
+    try{
+        const Id = req.params.id;
+        const userId = req.user.userId;
 
-export {visitSchedule, getVisits}
+        const visit = await Visit.findOne({_id: Id, user: userId});
+
+        if (!visit){
+            res.status(401).json({error: "Visit not found"});
+        }
+        res.status(200).json({visit});
+    }catch(err){
+        res.status(500).json({error: err.message})
+    }
+}
+
+const updateSpecificVisit = async (req, res) => {
+    try{ 
+        const Id = req.params.id;
+        const userId = req.user.userId;
+        const {visitDate, visitTime, duration, hospitalName, doctorName} = req.body;
+
+        const visit = await Visit.findOneAndUpdate({"_id": Id, "user": userId},
+            {visitDate, visitTime, duration, hospitalName, doctorName},
+            {new: true, runValidators: true}
+        );
+        if (!visit){
+            res.status(404).json({error: "Visit not found"});
+        }
+        res.status(200).json({visit});
+
+    }catch(err){
+        res.status(500.).json({error: err.message})
+    }
+}
+
+const deleteVisit = async (req, res) => {
+    try{
+        const Id = req.params;
+        const userId = req.user.userId;
+        
+        const visit = await Visit.findOneAndDelete({"_Id": Id, "user": userId})
+        if (!visit){
+            res.status(404).json({error: "No visit scheduled"})
+        }
+        res.status(200).json({message: "Deleted Visit Successfully"})
+    }catch(err){
+        res.status(500).json({error: err.message});
+    }
+}
+
+
+export {visitSchedule, getVisits, getVisitById, updateSpecificVisit, deleteVisit};

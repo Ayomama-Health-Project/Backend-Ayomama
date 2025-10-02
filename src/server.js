@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes.js'
 import visitRoutes from './routes/visitRoutes.js'
 import userRoutes from './routes/userRoutes.js'
+import {sendSMS} from './services/smsService.js';
 
 dotenv.config()
 
@@ -13,6 +14,7 @@ const port = 3000;
 app.use(express.json()) 
 
 connectDB();
+// sendSMS();
 
 app.use("/api/auth", authRoutes)
 app.use("/api/visit", visitRoutes)
