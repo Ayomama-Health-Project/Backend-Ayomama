@@ -13,5 +13,4 @@ export function decodeToken(token) {
     return decodedToken
 }
 
-// Keep a default export for existing default imports
-export default generateToken
+// export default {generateToken, decodeToken}

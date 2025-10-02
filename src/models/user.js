@@ -4,7 +4,7 @@ const userSchema = new mongoose.Schema(
     {
         name: {
             type: String,
-            required: true
+            required: false
         },
         email: {
             type: String,
@@ -16,6 +16,12 @@ const userSchema = new mongoose.Schema(
             required: true
         },
         phone: {
+            type: String,
+        },
+        lastPeriodDate: {
+            type: Date,
+        },
+        address: {
             type: String,
         },
         preferredLanguages: {

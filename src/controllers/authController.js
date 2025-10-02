@@ -1,15 +1,15 @@
 import User from "../models/user.js"
 import bcrypt from "bcryptjs";
-import generateToken from "../utils/jwt.js"
+import { generateToken } from "../utils/jwt.js"
 
 
 const signUp = async (req, res) => {
     try{
 
-        const { name, email, password } = req.body;
+        const {email, password } = req.body;
 
-        if (!name || !email || !password) {
-            return res.status(400).json({ error: 'user_name, email and password are required' });
+        if (!email || !password) {
+            return res.status(400).json({ error: 'email and password are required' });
         }
 
         const existingUser = await User.findOne({ email });
@@ -18,7 +18,7 @@ const signUp = async (req, res) => {
         }
 
         const hashedPassword = bcrypt.hashSync(password, 10);
-        const user = await User.create({ name, email, password: hashedPassword });
+        const user = await User.create({email, password: hashedPassword });
 
         res.status(201).json({ message: 'User registered successfully', userId: user._id });
 
@@ -59,4 +59,25 @@ const loginUser = async (req, res) => {
     }
 }
 
-export {signUp, loginUser};
+const getProfile = async (req, res) => {
+    try {
+        if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+
+        // Support tokens that contain userId or id
+        const id = req.user.userId || req.user.id || req.user._id;
+
+        const user = await User.findById(id).select('-password');
+        console.log(user);
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        return res.status(200).json(user);
+    }catch (err){
+        res.status(500).json({error: err.message});
+    };
+};
+
+
+export {signUp, loginUser, getProfile};

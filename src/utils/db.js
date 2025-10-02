@@ -10,10 +10,8 @@ const connectDB =() =>{
     mongoose.connect(process.env.MONGO_URI) //mongo url
     try {
         console.log('MongoDB connected successfully')
-        // logger.info('MongoDB connected successfully')
     } catch (error) {
         console.log('MongoDB connection failed', {error: error.message})
-    //    logger.error('MongoDB connection failed', { error: error.message })
     }
 }
 
