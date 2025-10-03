@@ -4,7 +4,10 @@ import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes.js'
 import visitRoutes from './routes/visitRoutes.js'
 import userRoutes from './routes/userRoutes.js'
-import {sendSMS} from './services/smsService.js';
+import reminderRoutes from './routes/reminderRoutes.js' 
+import chatRoutes from './routes/chatRoutes.js'
+
+import "./jobs/reminderJobs.js";
 
 dotenv.config()
 
@@ -14,11 +17,13 @@ const port = 3000;
 app.use(express.json()) 
 
 connectDB();
-// sendSMS();
 
-app.use("/api/auth", authRoutes)
-app.use("/api/visit", visitRoutes)
-app.use("/api/user", userRoutes)
+
+app.use("/api/auth", authRoutes);
+app.use("/api/visit", visitRoutes);
+app.use("/api/user", userRoutes);
+app.use("/api/reminder", reminderRoutes);
+app.use("/api/chat", chatRoutes);
 
 
 app.get("/", (req, res) =>{

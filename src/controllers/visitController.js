@@ -5,6 +5,8 @@ const visitSchedule = async (req, res) => {
     try{
         const { visitDate, visitTime, duration, hospitalName, doctorName } = req.body;
 
+        const reminderDateTime = new Date(`${visitDate}T${visitTime}`);
+
         const userId = req.user.userId;
 
         if (!visitDate || !visitTime){
@@ -13,8 +15,7 @@ const visitSchedule = async (req, res) => {
 
         const visit = await Visit.create({
             user: userId,
-            visitDate,
-            visitTime,
+            reminderDateTime,
             duration,
             hospitalName,
             doctorName
@@ -57,9 +58,10 @@ const updateSpecificVisit = async (req, res) => {
         const Id = req.params.id;
         const userId = req.user.userId;
         const {visitDate, visitTime, duration, hospitalName, doctorName} = req.body;
+        const reminderDateTime = new Date(`${visitDate}T${visitTime}`);
 
         const visit = await Visit.findOneAndUpdate({"_id": Id, "user": userId},
-            {visitDate, visitTime, duration, hospitalName, doctorName},
+            {reminderDateTime, duration, hospitalName, doctorName},
             {new: true, runValidators: true}
         );
         if (!visit){

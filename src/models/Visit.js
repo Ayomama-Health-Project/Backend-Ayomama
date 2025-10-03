@@ -4,12 +4,8 @@ const visitSchema = new mongoose.Schema({
     doctorName: {
         type: String,
     },
-    visitDate: {
+    reminderDateTime: {
         type: Date,
-        required: true
-    },
-    visitTime: {
-        type: String,
         required: true
     },
     duration: {
