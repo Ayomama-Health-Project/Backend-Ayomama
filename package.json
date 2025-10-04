@@ -20,10 +20,9 @@
     "jsonwebtoken": "^9.0.0",
     "mongoose": "^7.6.0",
     "node-cron": "^4.2.1",
+    "opencage-api-client": "^2.0.1",
     "request": "^2.88.2",
-    "twilio": "^5.10.2",
-    "zod": "^4.1.11",
-    "zod-express-middleware": "^1.4.0"
+    "twilio": "^5.10.2"
   },
   "devDependencies": {
     "nodemon": "^3.1.0"
