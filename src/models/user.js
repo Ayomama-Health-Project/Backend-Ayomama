@@ -4,41 +4,67 @@ const userSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: false,
+      default: "",
+      required: true,
     },
+
     email: {
       type: String,
       required: true,
       unique: true,
     },
+
     password: {
       type: String,
       required: true,
     },
+
     phone: {
       type: String,
+      default: "",
     },
+
     lastPeriodDate: {
       type: Date,
+      default: null,
     },
+
     address: {
       type: String,
+      default: "",
     },
+
     preferredLanguages: {
       type: String,
       enum: ["en", "yo", "ig", "ha"],
       default: "en",
     },
+
     emergencyContact: [
       {
-        name: String,
-        phone: String,
-        email: String,
-        relationship: String,
+        name: {
+          type: String,
+          default: "",
+        },
+
+        phone: {
+          type: String,
+          default: "",
+        },
+
+        email: {
+          type: String,
+          default: "",
+        },
+
+        relationship: {
+          type: String,
+          default: "",
+        },
       },
     ],
   },
-  { timestamp: true, versionKey: false }
+  { timestamps: true, versionKey: false } // small fix: "timestamps" not "timestamp"
 );
 
 export default mongoose.model("User", userSchema);

@@ -7,15 +7,17 @@ const COOKIE_OPTIONS = {
   secure: process.env.NODE_ENV === "production",
   sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
   path: "/",
-  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  maxAge: 7 * 24 * 60 * 60 * 1000,
 };
 
 const signUp = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { name, email, password } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({ error: "email and password are required" });
+    if (!name || !email || !password) {
+      return res
+        .status(400)
+        .json({ error: "name, email and password are required" });
     }
 
     const existingUser = await User.findOne({ email });
@@ -24,14 +26,16 @@ const signUp = async (req, res) => {
     }
 
     const hashedPassword = bcrypt.hashSync(password, 10);
-    const user = await User.create({ email, password: hashedPassword });
+    const user = await User.create({ name, email, password: hashedPassword });
 
-    res
-      .status(201)
-      .json({ message: "User registered successfully", userId: user._id });
+    res.status(201).json({
+      message: "User registered successfully",
+      success: true,
+      data: user,
+    });
   } catch (err) {
     console.error("signUp error:", err);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ success: false, error: "Internal server error" });
   }
 };
 
@@ -64,32 +68,34 @@ const loginUser = async (req, res) => {
     // add token to cookies
     res.cookie("token", accessToken, COOKIE_OPTIONS);
 
-    res.status(200).json({ message: "Login successful", token: accessToken });
+    res
+      .status(200)
+      .json({ message: "Login successful", success: true, token: accessToken });
   } catch (err) {
     console.error("loginUser error:", err);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ success: false, error: "Internal server error" });
   }
 };
 
-const getProfile = async (req, res) => {
-  try {
-    if (!req.user) return res.status(401).json({ error: "Unauthorized" });
+// const getProfile = async (req, res) => {
+//   try {
+//     if (!req.user) return res.status(401).json({ error: "Unauthorized" });
 
-    // Support tokens that contain userId or id
-    const id = req.user.userId || req.user.id || req.user._id;
+//     // Support tokens that contain userId or id
+//     const id = req.user._id;
 
-    const user = await User.findById(id).select("-password");
-    console.log(user);
+//     const user = await User.findById(id).select("-password");
+//     console.log(user);
 
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
+//     if (!user) {
+//       return res.status(404).json({ error: "User not found" });
+//     }
 
-    return res.status(200).json(user);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
+//     return res.status(200).json(user);
+//   } catch (err) {
+//     res.status(500).json({ error: err.message });
+//   }
+// };
 
 const logoutUser = async (_req, res) => {
   try {
@@ -105,8 +111,8 @@ const logoutUser = async (_req, res) => {
       .status(200)
       .json({ success: true, message: "Logout successful" });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ success: false, error: err.message });
   }
 };
 
-export { signUp, loginUser, getProfile, logoutUser };
+export { signUp, loginUser, logoutUser };

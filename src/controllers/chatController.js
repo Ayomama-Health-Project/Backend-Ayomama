@@ -1,6 +1,7 @@
 import { groq } from "@ai-sdk/groq";
 import { streamText, generateText } from "ai";
 import Message from "../models/message.js";
+import User from "../models/user.js";
 
 // Safety net for dangerous responses
 function safeResponse(text) {
@@ -28,6 +29,10 @@ export const chatWithAi = async (req, res) => {
       return res.status(400).json({ error: "Message is required" });
     }
 
+    // 🔑 Get user details
+    const user = await User.findById(userId).lean();
+    const userName = user?.name || "Mummy"; // fallback if no name
+
     // Save user message
     await Message.create({ user: userId, role: "user", content });
 
@@ -37,14 +42,15 @@ export const chatWithAi = async (req, res) => {
       .limit(10)
       .lean();
 
-    // System prompt for maternal health safety
+    // System prompt for maternal health safety + personalized name
     const systemPrompt = {
       role: "system",
-      content: `You are Favour, a fun maternal health and care assistant (Pre and Post pregnancy). You are a safe and empathetic and help expecting mother feel good and less panicky about maternal health issues.
+      content: `You are Favour, a fun maternal health and care assistant (Pre and Post pregnancy). You are safe, empathetic and you help expecting mothers feel good and less panicky about maternal health issues.
+      - Always address the user by their name (${userName}).
       - Always be fun and supportive while providing clear, supportive guidance on pregnancy, childbirth, newborn care, and maternal wellbeing.
-      - Always remind users you are not a doctor.
+      - Always remind users you are not a DOCTOR!!!! (⚠️).
       - Encourage professional medical attention when symptoms are severe or unclear.
-      - Keep responses concise and super friendly, culturally sensitive, and supportive.`,
+      - Keep responses concise, super friendly, culturally sensitive, and supportive.`,
     };
 
     const formattedMessages = [
@@ -76,7 +82,7 @@ export const chatWithAi = async (req, res) => {
 
       for await (const delta of response.textStream) {
         fullText += delta;
-        res.write(`data: ${delta}\n\n`); // send chunks to frontend
+        res.write(`data: ${delta}\n\n`);
       }
 
       // Apply safety check
@@ -95,7 +101,6 @@ export const chatWithAi = async (req, res) => {
       // ✅ Dev mode (return JSON, no streaming)
       const aiResponse = await generateText(aiOptions);
 
-      // Apply safety check
       const finalText = safeResponse(aiResponse.text);
 
       const assistantMessage = await Message.create({
