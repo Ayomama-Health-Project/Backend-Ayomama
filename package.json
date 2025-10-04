@@ -9,12 +9,17 @@
     "dev": "nodemon server.js"
   },
   "dependencies": {
+    "@ai-sdk/groq": "^2.0.22",
+    "ai": "^5.0.60",
     "axios": "^1.12.2",
     "bcryptjs": "^3.0.2",
+    "cookie-parser": "^1.4.7",
     "dotenv": "^17.2.3",
     "express": "^4.19.0",
+    "groq-sdk": "^0.33.0",
     "jsonwebtoken": "^9.0.0",
     "mongoose": "^7.6.0",
+    "node-cron": "^4.2.1",
     "request": "^2.88.2",
     "twilio": "^5.10.2"
   },

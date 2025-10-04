@@ -1,36 +1,32 @@
 import mongoose from "mongoose";
 
-const visitSchema = new mongoose.Schema({
+const visitSchema = new mongoose.Schema(
+  {
     doctorName: {
-        type: String,
+      type: String,
     },
-    visitDate: {
-        type: Date,
-        required: true
-    },
-    visitTime: {
-        type: String,
-        required: true
+    reminderDateTime: {
+      type: Date,
+      required: true,
     },
     duration: {
-        type: Number,
-        required: false
+      type: Number,
+      required: false,
     },
     notes: {
-        type: String
+      type: String,
     },
     hospitalName: {
-        type: String,
-        required: true
+      type: String,
+      required: true,
     },
     user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        required:true
-    }
-},
-{timestamp: true}
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+  },
+  { timestamp: true }
 );
-
 
 export default mongoose.model("Visit", visitSchema);

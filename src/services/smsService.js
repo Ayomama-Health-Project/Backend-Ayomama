@@ -8,9 +8,9 @@ const accountSid = process.env.ACCOUNT_SID;
 const authToken = process.env.AUTH_TOKEN;
 const client = twilio(accountSid, authToken);
 
-async function sendSMS() {
+async function sendSMS(phoneNumber, bodyMessage) {
   const message = await client.messages.create({
-    body: "This is time to meet your doctor at the scheduled time. Thank you for using Ayomama",
+    body: bodyMessage,
     from: process.env.TWILIO_PHONE_NUMBER,
     to: "+2349133037750",
   });
