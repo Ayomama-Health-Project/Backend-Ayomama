@@ -94,6 +94,7 @@ export const chatWithAi = async (req, res) => {
         role: "assistant",
         content: finalText,
       });
+      //
 
       res.write("event: end\n\n");
       res.end();
