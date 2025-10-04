@@ -1,10 +1,9 @@
-import express from 'express'
-import {chatWithBot} from './controllers/chatController.js'
-import authMiddleware from './middleware/authMiddleware.js'
+import { Router } from "express";
+import { chatWithAi } from "../controllers/chatController.js";
+import { protectRoute } from "../middleware/authMiddleware.js";
 
-router = express.Router()
+const router = Router();
 
-router.post("/", authMiddleware, chatWithBot);
+router.post("/send", protectRoute, chatWithAi);
 
-export default router
-
+export default router;

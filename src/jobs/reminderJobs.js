@@ -13,12 +13,15 @@ cron.schedule("* * * * *", async () => {
     // Find visits scheduled within the last 1 min window
     const reminders = await Visit.find({
       reminderDateTime: { $gte: oneMinuteAgo, $lte: now },
-      sent: false
+      sent: false,
     }).populate("userId", "phoneNumber");
 
     for (let r of reminders) {
       try {
-        await sendSMS(r.userId.phoneNumber, `Reminder: You have an appointment at ${r.hospitalName} with ${r.doctorName}`);
+        await sendSMS(
+          r.userId.phoneNumber,
+          `Reminder: You have an appointment at ${r.hospitalName} with ${r.doctorName}`
+        );
         r.sent = true;
         await r.save();
         console.log(`Reminder sent to ${r.userId.phoneNumber}`);
