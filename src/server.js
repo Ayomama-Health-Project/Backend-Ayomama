@@ -6,6 +6,7 @@ import visitRoutes from "./routes/visitRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import reminderRoutes from "./routes/reminderRoutes.js";
 import chatRoutes from "./routes/chatRoutes.js";
+import hospitalRoutes from "./routes/hospitalRoute.js";
 
 import "./jobs/reminderJobs.js";
 import cookieParser from "cookie-parser";
@@ -25,6 +26,7 @@ app.use("/api/visit", visitRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/reminder", reminderRoutes);
 app.use("/api/chat", chatRoutes);
+app.use("/api/hospitals", hospitalRoutes);
 
 app.get("/", (req, res) => {
   res.send({ message: "This is ayomama backend" });
