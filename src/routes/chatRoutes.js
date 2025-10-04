@@ -7,7 +7,7 @@ import { chatSchema } from "../middleware/validateSchema.js";
 const router = Router();
 
 router.post(
-  "/send",
+  "/",
   protectRoute,
   validateRequest({ body: chatSchema }),
   chatWithAi
