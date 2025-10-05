@@ -41,11 +41,12 @@ const updateLanguagePreference = async (req, res) => {
 const profileInformation = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { name, address, lastPeriodDate, emergencyContact } = req.body;
+    const { name, address, lastPeriodDate, contact, emergencyContact } =
+      req.body;
 
     const updatedProfile = await User.findByIdAndUpdate(
       userId,
-      { name, address, lastPeriodDate, emergencyContact },
+      { name, address, lastPeriodDate, contact, emergencyContact },
       { new: true }
     ).select("-password");
 
