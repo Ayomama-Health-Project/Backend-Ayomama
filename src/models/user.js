@@ -40,6 +40,11 @@ const userSchema = new mongoose.Schema(
       default: "en",
     },
 
+    contact: {
+      type: String,
+      default: "",
+    },
+
     emergencyContact: [
       {
         name: {
