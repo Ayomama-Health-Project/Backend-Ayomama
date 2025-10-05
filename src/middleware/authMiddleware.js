@@ -45,7 +45,10 @@ export async function protectRoute(req, res, next) {
     } catch (err) {
       return res
         .status(401)
-        .json({ message: "Invalid or expired token", success: false });
+        .json({
+          message: "Token expired, please log in again",
+          success: false,
+        });
     }
 
     // decoded.userId (since we fixed generateToken)

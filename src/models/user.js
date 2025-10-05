@@ -69,7 +69,7 @@ const userSchema = new mongoose.Schema(
       },
     ],
   },
-  { timestamps: true, versionKey: false } // small fix: "timestamps" not "timestamp"
+  { timestamps: true, versionKey: false }
 );
 
 export default mongoose.model("User", userSchema);

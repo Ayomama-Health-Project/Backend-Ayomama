@@ -26,7 +26,7 @@ const visitSchema = new mongoose.Schema(
       required: true,
     },
   },
-  { timestamp: true }
+  { timestamps: true, versionKey: false }
 );
 
 export default mongoose.model("Visit", visitSchema);
