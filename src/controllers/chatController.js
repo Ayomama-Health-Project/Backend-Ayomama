@@ -106,7 +106,6 @@ export const chatWithAi = async (req, res) => {
     };
 
     if (process.env.NODE_ENV === "production") {
-      // ✅ Streaming mode (SSE)
       res.setHeader("Content-Type", "text/event-stream");
       res.setHeader("Cache-Control", "no-cache");
       res.setHeader("Connection", "keep-alive");
@@ -134,7 +133,6 @@ export const chatWithAi = async (req, res) => {
       res.write("event: end\n\n");
       res.end();
     } else {
-      // ✅ Dev mode (return JSON, no streaming)
       const aiResponse = await generateText(aiOptions);
 
       const finalText = safeResponse(aiResponse.text);
