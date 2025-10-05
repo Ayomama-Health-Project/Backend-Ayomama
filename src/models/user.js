@@ -68,8 +68,19 @@ const userSchema = new mongoose.Schema(
         },
       },
     ],
+
+    // OTP fields
+    resetOTP: {
+      type: String,
+      default: null,
+    },
+
+    otpExpiry: {
+      type: Date,
+      default: null,
+    },
   },
-  { timestamps: true, versionKey: false } // small fix: "timestamps" not "timestamp"
+  { timestamps: true, versionKey: false }
 );
 
 export default mongoose.model("User", userSchema);
