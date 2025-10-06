@@ -8,6 +8,7 @@ import reminderRoutes from "./routes/reminderRoutes.js";
 import chatRoutes from "./routes/chatRoutes.js";
 import hospitalRoutes from "./routes/hospitalRoute.js";
 import chwRoutes from "./routes/chwRoutes.js"
+import patientRoutes from "./routes/patientRoutes.js"
 
 
 import "./jobs/reminderJobs.js";
@@ -32,6 +33,7 @@ app.use("/api/hospitals", hospitalRoutes);
 
 // Routes for CHW(Community Health Workers)
 app.use("/api/auth_chw", chwRoutes)
+app.use("/api/patient", patientRoutes)
 
 
 app.get("/", (req, res) => {

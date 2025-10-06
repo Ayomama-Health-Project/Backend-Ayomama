@@ -1,7 +1,7 @@
 import mongoose from 'mongoose'
 
 const chwSchema = new mongoose.Schema({
-    name: {
+    fullName: {
         type: String,
         required: false,
         default: ""

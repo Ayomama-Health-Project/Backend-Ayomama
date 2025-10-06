@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import CHW from '../models/Chw.js';
 import {generateToken} from '../utils/jwt.js'
+import Patient from '../models/patient.js';
 
 
 const COOKIE_OPTIONS = {
@@ -15,8 +16,8 @@ const COOKIE_OPTIONS = {
 
 const signUpCHW = async (req, res) => {
     try{
-        const { name, email, password} = req.body;
-        if (!name || !email || !password ) return res.status(400).json({message: "Input you name, email or password"});
+        const {email, password} = req.body;
+        if (!email || !password ) return res.status(400).json({message: "Input you name, email or password"});
 
         const existingUser = await CHW.findOne({email});
         if (existingUser) return res.status(400).json({message: "This user already exist"});
@@ -24,7 +25,7 @@ const signUpCHW = async (req, res) => {
         const hashedPassword = bcrypt.hashSync(password, 10);
         console.log(hashedPassword);
 
-        const chwUser = await CHW.create({name, email, password: hashedPassword});
+        const chwUser = await CHW.create({email, password: hashedPassword});
 
         res.status(201).json({
             message: "User successfully registered",
@@ -64,20 +65,48 @@ const loginCHW = async (req, res) => {
     }
 }
 
-// const chwProfile = async (req, res) => {
-//     try{
-//         const {name, state, localGovernment, facilityName, facilityCode} = req.body
+const chwProfile = async (req, res) => {
+    try{
+        const {fullName, state, localGovernment, facilityName, facilityCode} = req.body;
 
-//         const chwId = req.user._id
-
-//         const user = await CHW.findByIdAndUpdate({id: chwId})
-
-//     }catch(err){
-//         res.status(500).json({error: err.message})
-//     }
-// } 
+        const chwId = req.user._id;
 
 
+        const updatedCHW = await CHW.findByIdAndUpdate(chwId, {fullName, state, localGovernment, facilityName, facilityCode}, {new: treu}).select("-password");
+
+        res.status(201).json({message: "Profile updated", success: true, data: updatedCHW});
+
+    }catch(err){
+        res.status(500).json({error: err.message})
+    }
+} 
+
+export const assignPatient = async (req, res) => {
+  try {
+    const {patientId } = req.body;
+
+    const chwId = req.user._id
+
+    const chw = await CHW.findById(chwId);
+    const patient = await Patient.findById(patientId);
+
+    if (!chw || !patient)
+      return res.status(404).json({ error: "CHW or Patient not found" });
+
+    chw.assignedPatients.push(patientId);
+    patient.chw = chwId;
+
+    await chw.save();
+    await patient.save();
+
+    res.status(200).json({ message: "Patient assigned successfully" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
 
-export {signUpCHW, loginCHW}
+
+
+
+export {signUpCHW, loginCHW, chwProfile};
