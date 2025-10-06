@@ -72,7 +72,7 @@ const chwProfile = async (req, res) => {
         const chwId = req.user._id;
 
 
-        const updatedCHW = await CHW.findByIdAndUpdate(chwId, {fullName, state, localGovernment, facilityName, facilityCode}, {new: treu}).select("-password");
+        const updatedCHW = await CHW.findByIdAndUpdate(chwId, {fullName, state, localGovernment, facilityName, facilityCode}, {new: true}).select("-password");
 
         res.status(201).json({message: "Profile updated", success: true, data: updatedCHW});
 

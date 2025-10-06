@@ -30,7 +30,7 @@ app.use("/api/visit", visitRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/reminder", reminderRoutes);
 app.use("/api/chat", chatRoutes);
-app.use("/api/hospitals", hospitalRoutes);
+app.usea("/api/hospitals", hospitalRoutes);
 app.use("/api/antenatal", antenatalRoutes);
 
 // Routes for CHW(Community Health Workers)
