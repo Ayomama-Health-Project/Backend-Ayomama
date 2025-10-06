@@ -4,6 +4,7 @@ const visitSchema = new mongoose.Schema(
   {
     doctorName: {
       type: String,
+      required: true,
     },
     reminderDateTime: {
       type: Date,
@@ -11,7 +12,6 @@ const visitSchema = new mongoose.Schema(
     },
     duration: {
       type: Number,
-      required: false,
     },
     notes: {
       type: String,
@@ -20,10 +20,14 @@ const visitSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    user: {
+    userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
+    },
+    sent: {
+      type: Boolean,
+      default: false,
     },
   },
   { timestamps: true, versionKey: false }
