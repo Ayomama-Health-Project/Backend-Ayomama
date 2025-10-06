@@ -6,10 +6,25 @@ import { getLang } from "./chatController.js";
 
 export const createAntenatalUpdate = async (req, res) => {
   try {
-    const { bloodPressure, temperature, weight, bloodLevel, date } = req.body;
+    const {
+      bloodPressure,
+      temperature,
+      weight,
+      bloodLevel,
+      prescribedDrugs,
+      drugsToAvoid,
+      date,
+    } = req.body;
     const userId = req.user._id;
 
-    if (!bloodPressure || !temperature || !weight || !bloodLevel) {
+    if (
+      !bloodPressure ||
+      !temperature ||
+      !weight ||
+      !bloodLevel ||
+      !prescribedDrugs ||
+      !drugsToAvoid
+    ) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -20,6 +35,8 @@ export const createAntenatalUpdate = async (req, res) => {
       temperature,
       weight,
       bloodLevel,
+      prescribedDrugs,
+      drugsToAvoid,
       date: date || new Date(),
     });
 
@@ -46,9 +63,10 @@ export const createAntenatalUpdate = async (req, res) => {
     Format:
     - Relate to the user with their preferred language: ${userLang}
     - Refer to them with their name: ${userName}
-    - One short paragraph
     - Friendly tone
     - Add 1–2 emojis
+    - Remind them to take prescribed drugs: ${prescribedDrugs}
+    - Caution about drugs to avoid: ${drugsToAvoid}
     - If any value seems abnormal, gently suggest seeing a doctor.
     - Otherwise, reassure that everything looks good.
     `;
