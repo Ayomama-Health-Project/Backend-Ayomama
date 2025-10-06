@@ -20,6 +20,25 @@ function safeResponse(text) {
   return text;
 }
 
+export function getLang(lang) {
+  switch (lang) {
+    case "en":
+      return "English";
+
+    case "yo":
+      return "Yoruba";
+
+    case "ig":
+      return "Igbo";
+
+    case "ha":
+      return "Hausa";
+
+    default:
+      return "Unknown";
+  }
+}
+
 export const chatWithAi = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -31,7 +50,12 @@ export const chatWithAi = async (req, res) => {
 
     // 🔑 Get user details
     const user = await User.findById(userId).lean();
-    const userName = user?.name || "Mummy"; // fallback if no name
+    const userName = user?.name || "Mummy"; // fallback if no name 0
+    const lang = user?.preferredLanguages || "en"; // fallback if no preference
+
+    const userLang = getLang(lang);
+
+    console.log(userName + " is speaking", userLang);
 
     // Save user message
     await Message.create({ user: userId, role: "user", content });
@@ -42,18 +66,25 @@ export const chatWithAi = async (req, res) => {
       .limit(10)
       .lean();
 
+    // - If ${userLang} is not English, reply primarily in English but include short phrases, greetings, or culturally relevant expressions in ${userLang} where appropriate.
+
     const systemPrompt = {
       role: "system",
       content: `
         You are Favour, the official AI Assistant of Ayomama 🤱🏽💛.
+
+        The user's preferred language is ${userLang}.
+        - Never write gibberish or non-existent words; make sure every message is understandable.
+        - Always sound natural and friendly.
             
         Your role:
         - Always introduce yourself warmly if there is no prior message history (${
           history.length === 0
         }), assuming it is the user's first time chatting.  
           (Example introduction: "Hi ${userName}! 💛 I'm Favour, your friendly Ayomama assistant 🤰🏽🌸. I'm here to guide you through pregnancy and motherhood with care and support.")
+        - Always respond in ${userLang}.
+        - Always be **fun and supportive** while providing clear, supportive guidance on pregnancy, childbirth, newborn care, and maternal wellbeing.
         - Be a **friendly, supportive, and knowledgeable maternal health companion** for expecting and new mothers.
-        - Always address the user by their name (${userName}).
         - Keep your tone **warm, caring, encouraging, and culturally sensitive**.
         - Use **emojis naturally** to make responses feel comforting (e.g., 💕, 🤰🏽, 🌸, 🍼, 😊, ⚠️, etc.), but avoid overusing them or including them in medical instructions.
             
@@ -96,7 +127,7 @@ export const chatWithAi = async (req, res) => {
     ];
 
     // Groq model + tuned options
-    const model = groq("llama-3.1-8b-instant");
+    const model = groq("openai/gpt-oss-120b");
     const aiOptions = {
       model,
       messages: formattedMessages,
