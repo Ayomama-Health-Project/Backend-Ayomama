@@ -69,29 +69,63 @@ export const loginUser = async (req, res) => {
   }
 };
 
-// const getProfile = async (req, res) => {
-//   try {
-//     if (!req.user) return res.status(401).json({ error: "Unauthorized" });
-
-//     // Support tokens that contain userId or id
-//     const id = req.user._id;
-
-//     const user = await User.findById(id).select("-password");
-//     console.log(user);
-
-//     if (!user) {
-//       return res.status(404).json({ error: "User not found" });
-//     }
-
-//     return res.status(200).json(user);
-//   } catch (err) {
-//     res.status(500).json({ error: err.message });
-//   }
-// };
-
-const logoutUser = async (_req, res) => {
+// === Request Password Reset (Send OTP) ===
+export const requestPasswordReset = async (req, res) => {
+  const { email } = req.body;
   try {
-    // clear cookie (must match options like path/sameSite/secure)
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    // const otp = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP
+    const otp = Math.floor(1000 + Math.random() * 9000).toString(); // 4-digit OTP
+    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // expires in 10 mins
+
+    user.resetOTP = otp;
+    user.otpExpiry = otpExpiry;
+    await user.save();
+
+    await sendOTPEmail(user.email, otp);
+
+    res.status(200).json({ message: "OTP sent to email", success: true });
+  } catch (err) {
+    console.error("requestPasswordReset error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// === Verify OTP and Reset Password ===
+export const verifyOTPAndResetPassword = async (req, res) => {
+  const { email, otp, newPassword } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    if (user.resetOTP !== otp)
+      return res.status(400).json({ error: "Invalid OTP" });
+
+    if (user.otpExpiry < Date.now())
+      return res.status(400).json({ error: "OTP expired" });
+
+    const hashedPassword = bcrypt.hashSync(newPassword, 10);
+    user.password = hashedPassword;
+    user.resetOTP = null;
+    user.otpExpiry = null;
+
+    await user.save();
+
+    res
+      .status(200)
+      .json({ message: "Password reset successful", success: true });
+  } catch (err) {
+    console.error("verifyOTPAndResetPassword error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// === Logout ===
+export const logoutUser = async (_req, res) => {
+  try {
     res.clearCookie("token", {
       path: "/",
       httpOnly: true,
