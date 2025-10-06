@@ -7,18 +7,37 @@ export const visitSchedule = async (req, res) => {
       req.body;
     const userId = req.user._id;
 
+    // Check required fields
     if (!visitDate || !visitTime) {
       return res
         .status(400)
         .json({ error: "Visit date and time are required." });
     }
 
-    const reminderDateTime = new Date(`${visitDate}T${visitTime}`);
+    // Convert visitTime safely
+    let reminderDateTime;
+    if (typeof visitTime === "string" && visitTime.includes(":")) {
+      // e.g. "14:30"
+      reminderDateTime = new Date(`${visitDate}T${visitTime}`);
+    } else if (typeof visitTime === "number") {
+      // Interpret as hours offset from start of day (optional design)
+      const dateObj = new Date(visitDate);
+      dateObj.setHours(visitTime, 0, 0, 0);
+      reminderDateTime = dateObj;
+    } else {
+      throw new Error(
+        "Invalid visitTime format. Use 'HH:mm' or a number (hours)."
+      );
+    }
+
+    // Parse duration correctly (strip non-digits)
+    const numericDuration =
+      typeof duration === "string" ? parseInt(duration) : Number(duration) || 0;
 
     const visit = await Visit.create({
       userId,
       reminderDateTime,
-      duration,
+      duration: numericDuration,
       hospitalName,
       doctorName,
       notes,
@@ -26,6 +45,7 @@ export const visitSchedule = async (req, res) => {
 
     res.status(201).json({ message: "Visit successfully scheduled 💛", visit });
   } catch (err) {
+    console.error("Visit schedule error:", err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -66,11 +86,47 @@ export const updateSpecificVisit = async (req, res) => {
     const { visitDate, visitTime, duration, hospitalName, doctorName, notes } =
       req.body;
 
-    const reminderDateTime = new Date(`${visitDate}T${visitTime}`);
+    let reminderDateTime;
 
+    // ✅ Safely construct reminderDateTime
+    if (visitDate && visitTime) {
+      if (typeof visitTime === "string" && visitTime.includes(":")) {
+        // Example: "14:30"
+        reminderDateTime = new Date(`${visitDate}T${visitTime}`);
+      } else if (typeof visitTime === "number") {
+        // Example: 9 (for 9 AM)
+        const dateObj = new Date(visitDate);
+        dateObj.setHours(visitTime, 0, 0, 0);
+        reminderDateTime = dateObj;
+      } else {
+        throw new Error(
+          "Invalid visitTime format. Use 'HH:mm' or a number (hours)."
+        );
+      }
+
+      if (isNaN(reminderDateTime.getTime())) {
+        throw new Error("Invalid visitDate or visitTime provided.");
+      }
+    }
+
+    // ✅ Safely parse duration
+    const numericDuration =
+      typeof duration === "string" ? parseInt(duration) : Number(duration) || 0;
+
+    // ✅ Build update object dynamically
+    const updateFields = {
+      duration: numericDuration,
+      hospitalName,
+      doctorName,
+      notes,
+    };
+
+    if (reminderDateTime) updateFields.reminderDateTime = reminderDateTime;
+
+    // ✅ Perform update
     const visit = await Visit.findOneAndUpdate(
       { _id: id, userId },
-      { reminderDateTime, duration, hospitalName, doctorName, notes },
+      updateFields,
       { new: true, runValidators: true }
     );
 
@@ -80,6 +136,7 @@ export const updateSpecificVisit = async (req, res) => {
 
     res.status(200).json({ message: "Visit updated successfully 💛", visit });
   } catch (err) {
+    console.error("Visit update error:", err);
     res.status(500).json({ error: err.message });
   }
 };

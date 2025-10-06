@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { chatWithAi } from "../controllers/chatController.js";
 import { protectRoute } from "../middleware/authMiddleware.js";
+import { createAntenatalUpdate } from "../controllers/antenatalController.js";
 
 const router = Router();
 
-router.post("/", protectRoute, chatWithAi);
+router.post("/", protectRoute, createAntenatalUpdate);
 
 export default router;
