@@ -9,8 +9,10 @@ import chatRoutes from "./routes/chatRoutes.js";
 import hospitalRoutes from "./routes/hospitalRoute.js";
 import chwRoutes from "./routes/chwRoutes.js";
 import antenatalRoutes from "./routes/antenatalRoute.js";
+import patientRoutes from './routes/patientRoutes.js';
 
 import "./jobs/reminderJobs.js";
+import { formToJSON } from "axios";
 import cookieParser from "cookie-parser";
 
 dotenv.config();
@@ -33,6 +35,7 @@ app.use("/api/antenatal", antenatalRoutes);
 
 // Routes for CHW(Community Health Workers)
 app.use("/api/auth_chw", chwRoutes);
+app.use("/api/patient", patientRoutes);
 
 app.get("/", (req, res) => {
   res.send({ message: "This is ayomama backend" });
