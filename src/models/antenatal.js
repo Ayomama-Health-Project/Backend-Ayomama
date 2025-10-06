@@ -23,6 +23,14 @@ const antenatalSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    prescribedDrugs: {
+      type: String,
+      required: true,
+    },
+    drugsToAvoid: {
+      type: String,
+      required: true,
+    },
     date: {
       type: Date,
       default: Date.now,
