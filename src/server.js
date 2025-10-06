@@ -7,6 +7,8 @@ import userRoutes from "./routes/userRoutes.js";
 import reminderRoutes from "./routes/reminderRoutes.js";
 import chatRoutes from "./routes/chatRoutes.js";
 import hospitalRoutes from "./routes/hospitalRoute.js";
+import chwRoutes from "./routes/chwRoutes.js"
+
 
 import "./jobs/reminderJobs.js";
 import cookieParser from "cookie-parser";
@@ -28,6 +30,10 @@ app.use("/api/reminder", reminderRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/hospitals", hospitalRoutes);
 
+// Routes for CHW(Community Health Workers)
+app.use("/api/auth_chw", chwRoutes)
+
+
 app.get("/", (req, res) => {
   res.send({ message: "This is ayomama backend" });
 });
@@ -35,3 +41,5 @@ app.get("/", (req, res) => {
 app.listen(port, (req, res) => {
   console.log(`server running on {http://localhost:3000}`);
 });
+
+

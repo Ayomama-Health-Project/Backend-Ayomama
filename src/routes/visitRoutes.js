@@ -8,10 +8,6 @@ import {
 } from "../controllers/visitController.js";
 import { protectRoute } from "../middleware/authMiddleware.js";
 import express from "express";
-// import {
-//   createVisitSchema,
-//   updateVisitSchema,
-// } from "../middleware/validateSchema.js";
 
 const router = express.Router();
 

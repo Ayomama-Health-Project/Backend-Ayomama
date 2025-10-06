@@ -1,98 +1,102 @@
 import Visit from "../models/Visit.js";
 
-const visitSchedule = async (req, res) => {
+// 📅 Schedule a visit
+export const visitSchedule = async (req, res) => {
   try {
-    const { visitDate, visitTime, duration, hospitalName, doctorName } =
+    const { visitDate, visitTime, duration, hospitalName, doctorName, notes } =
       req.body;
-
-    const reminderDateTime = new Date(`${visitDate}T${visitTime}`);
-
     const userId = req.user._id;
 
     if (!visitDate || !visitTime) {
-      res.status(400).json({ error: "Visit Date and Time are required" });
+      return res
+        .status(400)
+        .json({ error: "Visit date and time are required." });
     }
 
+    const reminderDateTime = new Date(`${visitDate}T${visitTime}`);
+
     const visit = await Visit.create({
-      user: userId,
+      userId,
       reminderDateTime,
       duration,
       hospitalName,
       doctorName,
+      notes,
     });
-    res.status(200).json({ message: "Visit Successfully Scheduled", visit });
+
+    res.status(201).json({ message: "Visit successfully scheduled 💛", visit });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-const getVisits = async (req, res) => {
+// 📋 Get all visits for a user
+export const getVisits = async (req, res) => {
   try {
     const userId = req.user._id;
-    const visits = await Visit.find({ user: userId });
+    const visits = await Visit.find({ userId }).sort({ reminderDateTime: 1 });
     res.status(200).json({ visits });
   } catch (err) {
-    res.status(500).json({ err: err.message });
+    res.status(500).json({ error: err.message });
   }
 };
 
-const getVisitById = async (req, res) => {
+// 🔍 Get a specific visit by ID
+export const getVisitById = async (req, res) => {
   try {
-    const Id = req.params.id;
+    const { id } = req.params;
     const userId = req.user._id;
 
-    const visit = await Visit.findOne({ _id: Id, user: userId });
-
+    const visit = await Visit.findOne({ _id: id, userId });
     if (!visit) {
-      res.status(401).json({ error: "Visit not found" });
+      return res.status(404).json({ error: "Visit not found." });
     }
+
     res.status(200).json({ visit });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-const updateSpecificVisit = async (req, res) => {
+// ✏️ Update a specific visit
+export const updateSpecificVisit = async (req, res) => {
   try {
-    const Id = req.params.id;
+    const { id } = req.params;
     const userId = req.user._id;
-    const { visitDate, visitTime, duration, hospitalName, doctorName } =
+    const { visitDate, visitTime, duration, hospitalName, doctorName, notes } =
       req.body;
+
     const reminderDateTime = new Date(`${visitDate}T${visitTime}`);
 
     const visit = await Visit.findOneAndUpdate(
-      { _id: Id, user: userId },
-      { reminderDateTime, duration, hospitalName, doctorName },
+      { _id: id, userId },
+      { reminderDateTime, duration, hospitalName, doctorName, notes },
       { new: true, runValidators: true }
     );
+
     if (!visit) {
-      res.status(404).json({ error: "Visit not found" });
+      return res.status(404).json({ error: "Visit not found." });
     }
-    res.status(200).json({ visit });
+
+    res.status(200).json({ message: "Visit updated successfully 💛", visit });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-const deleteVisit = async (req, res) => {
+// 🗑️ Delete a specific visit
+export const deleteVisit = async (req, res) => {
   try {
-    const Id = req.params;
+    const { id } = req.params;
     const userId = req.user._id;
 
-    const visit = await Visit.findOneAndDelete({ _Id: Id, user: userId });
+    const visit = await Visit.findOneAndDelete({ _id: id, userId });
     if (!visit) {
-      res.status(404).json({ error: "No visit scheduled" });
+      return res.status(404).json({ error: "No visit scheduled." });
     }
-    res.status(200).json({ message: "Deleted Visit Successfully" });
+
+    res.status(200).json({ message: "Visit deleted successfully 💛" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-};
-
-export {
-  visitSchedule,
-  getVisits,
-  getVisitById,
-  updateSpecificVisit,
-  deleteVisit,
 };
