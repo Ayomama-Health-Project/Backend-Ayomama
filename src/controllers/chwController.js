@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import CHW from '../models/Chw.js';
-import {generateToken} from '../utils/jwt.js'
+import {generateToken, decodeToken} from '../utils/jwt.js'
 import Patient from '../models/patient.js';
 
 
@@ -105,8 +105,24 @@ export const assignPatient = async (req, res) => {
   }
 };
 
+const currentUserCHW = async (req, res) => {
+  try{
+    const {token} = req.cookies;
+    if (!token) return res.status(401).json({message: "Unauthorized"});
+    const decoded = decodeToken(token);
+    if (!decoded) return res.status(401).json({message: "Unauthorized"});
+
+    const user = await CHW.findById(decoded.userId).select("-password");
+
+    res.status(200).json({message: "Current user fetched", success: true, data: user});
+
+  }catch(err){
+    res.status(500).json({error: err.message})
+  }
+}
 
 
 
 
-export {signUpCHW, loginCHW, chwProfile};
+
+export {signUpCHW, loginCHW, chwProfile, currentUserCHW};
