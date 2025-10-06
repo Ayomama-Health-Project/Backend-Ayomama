@@ -60,4 +60,23 @@ const profileInformation = async (req, res) => {
   }
 };
 
-export { updateLanguagePreference, profileInformation, getUser };
+const getUserEmergencyContact = async (req, res) => {
+  try{
+    const userId = req.user._id;
+    const user = await User.findById(userId).select("emergencyContact -_id");
+    if (!user) return res.status(404).json({error: "User not found"});
+
+    res.status(200).json({message: "Emergency contact for user", success: true, data: user.emergencyContact})
+
+  }catch(err){
+    res.status(500).json({success: false, error: err.message})
+  }
+}
+
+
+
+
+
+
+export { updateLanguagePreference, profileInformation, getUser, getUserEmergencyContact};
+
