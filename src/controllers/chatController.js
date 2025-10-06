@@ -20,6 +20,25 @@ function safeResponse(text) {
   return text;
 }
 
+export function getLang(lang) {
+  switch (lang) {
+    case "en":
+      return "English";
+
+    case "yo":
+      return "Yoruba";
+
+    case "ig":
+      return "Igbo";
+
+    case "ha":
+      return "Hausa";
+
+    default:
+      return "Unknown";
+  }
+}
+
 export const chatWithAi = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -34,28 +53,9 @@ export const chatWithAi = async (req, res) => {
     const userName = user?.name || "Mummy"; // fallback if no name 0
     const lang = user?.preferredLanguages || "en"; // fallback if no preference
 
-    function getLang(lang) {
-      switch (lang) {
-        case "en":
-          return "English";
-
-        case "yo":
-          return "Yoruba";
-
-        case "ig":
-          return "Igbo";
-
-        case "ha":
-          return "Hausa";
-
-        default:
-          return "Unknown";
-      }
-    }
-
     const userLang = getLang(lang);
 
-    console.log(userName + " is speaking ", userLang);
+    console.log(userName + " is speaking", userLang);
 
     // Save user message
     await Message.create({ user: userId, role: "user", content });
