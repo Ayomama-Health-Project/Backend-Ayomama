@@ -17,17 +17,36 @@ export const sendOTPEmail = async (email, otp) => {
   const mailOptions = {
     from: `"Ayomama" <${process.env.EMAIL_USER}>`,
     to: email,
-    subject: "Your Ayomama Password Reset OTP 💛",
+    subject: "Your Ayomama Password Reset OTP",
     html: `
-      <div style="font-family: 'Poppins', sans-serif; color: #333;">
-        <h2>Hi Mama 💛</h2>
-        <p>Use the OTP below to reset your password. This code will expire in <strong>10 minutes</strong>.</p>
-        <div style="font-size: 24px; font-weight: bold; color: #fdbf67; margin: 20px 0;">
+      <div style="
+        font-family: 'Poppins', sans-serif;
+        background-color: #fff;
+        color: #000;
+        padding: 30px;
+        border-radius: 10px;
+        max-width: 500px;
+        margin: auto;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      ">
+        <h2 style="text-align: center; font-weight: 600;">Hi Mama 🤱🏽</h2>
+        <p style="font-size: 15px; line-height: 1.6; text-align: center;">
+          Use the code below to reset your password. It will expire in 
+          <strong>10 minutes</strong>.
+        </p>
+        <h1 style="
+          font-size: 36px;
+          font-weight: bold;
+          text-align: center;
+          letter-spacing: 6px;
+        ">
           ${otp}
-        </div>
-        <p>If you didn’t request this, please ignore this email.</p>
+        </h1>
+        <p style="font-size: 14px; color: #555; text-align: center;">
+          If you didn’t request this, please ignore this email.
+        </p>
         <br/>
-        <p>— The Ayomama Team</p>
+        <p style="text-align: center; font-size: 14px;">— The Ayomama Team</p>
       </div>
     `,
   };
@@ -48,21 +67,34 @@ export const sendReminderEmail = async (email, visit) => {
   const mailOptions = {
     from: `"Ayomama" <${process.env.EMAIL_USER}>`,
     to: email,
-    subject: "Appointment Reminder 💛",
+    subject: "Appointment Reminder 🤱🏽",
     html: `
-      <div style="font-family: 'Poppins', sans-serif; color: #333;">
-        <h2>Hi Mama 💛</h2>
-        <p>This is a friendly reminder for your upcoming appointment:</p>
-        <ul>
-          <li><strong>Hospital:</strong> ${visit.hospitalName}</li>
-          <li><strong>Doctor:</strong> ${visit.doctorName}</li>
-          <li><strong>Date & Time:</strong> ${new Date(
+      <div style="
+        font-family: 'Poppins', sans-serif;
+        background-color: #fff;
+        color: #000;
+        padding: 30px;
+        border-radius: 10px;
+        max-width: 500px;
+        margin: auto;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      ">
+        <h2 style="text-align: center; font-weight: 600;">Hi Mama 🤱🏽</h2>
+        <p style="font-size: 15px; line-height: 1.6; text-align: center;">
+          This is a friendly reminder for your upcoming appointment:
+        </p>
+        <div style="margin: 20px 0; text-align: center;">
+          <p><strong>Hospital:</strong> ${visit.hospitalName}</p>
+          <p><strong>Doctor:</strong> ${visit.doctorName}</p>
+          <p><strong>Date & Time:</strong> ${new Date(
             visit.reminderDateTime
-          ).toLocaleString()}</li>
-        </ul>
-        <p>Please ensure to arrive a few minutes early. We’re always here for you 💛</p>
+          ).toLocaleString()}</p>
+        </div>
+        <p style="font-size: 14px; line-height: 1.6; text-align: center;">
+          Please arrive a few minutes early. We're always here for you. 💕
+        </p>
         <br/>
-        <p>— The Ayomama Team 🤱🏽</p>
+        <p style="text-align: center; font-size: 14px;">— The Ayomama Team</p>
       </div>
     `,
   };
