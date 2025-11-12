@@ -5,10 +5,13 @@ import {
   logoutUser,
   requestPasswordReset,
   verifyOTPAndResetPassword,
+  getCurrentUser
 } from "../controllers/authController.js";
 import { protectRoute } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
+
+router.get("/current_user", protectRoute, getCurrentUser)
 
 router.post("/register", signUp);
 router.post("/login", loginUser);
