@@ -12,6 +12,7 @@ const COOKIE_OPTIONS = {
   maxAge: 7 * 24 * 60 * 60 * 1000,
 };
 
+
 // === Sign Up ===
 export const signUp = async (req, res) => {
   try {
@@ -57,6 +58,10 @@ export const loginUser = async (req, res) => {
 
     const accessToken = generateToken({ userId: user._id });
     res.cookie("token", accessToken, COOKIE_OPTIONS);
+
+    // Update Lastlogin
+    user.lastLogin = new Date();
+    await user.save();
 
     res.status(200).json({
       message: "Login successful",

@@ -13,8 +13,8 @@ import patientRoutes from './routes/patientRoutes.js';
 import partnerRoute from './routes/partnerRoute.js'
 
 import "./jobs/reminderJobs.js";
-import { formToJSON } from "axios";
 import cookieParser from "cookie-parser";
+
 
 dotenv.config();
 
@@ -24,6 +24,7 @@ const port = 3000;
 app.use(express.json());
 app.use(cookieParser());
 
+console.info(">>>  This is for Testing")
 connectDB();
 
 app.use("/api/auth", authRoutes);
