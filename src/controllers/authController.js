@@ -1,4 +1,4 @@
-import User from "../models/user.js";
+import {User, PostPartum} from "../models/user.js";
 import bcrypt from "bcryptjs";
 import { generateToken } from "../utils/jwt.js";
 import { sendOTPEmail } from "../utils/email.js";
@@ -41,6 +41,28 @@ export const signUp = async (req, res) => {
   }
 };
 
+export const postPartumSignUp = async (req, res) => {
+  try {
+    const {email, password } = req.body;
+
+    if (!email || !password)
+      return res
+        .status(400)
+        .json({ error: "email and password are required" });
+    
+    const existingUser = await PostPartum.findOne({email});
+    if (existingUser) return res.status(409).json({error: "User already exists"});
+
+    const hashedPassword = bcrypt.hashSync(password, 10);
+    const postPartumUser = await PostPartum.create({email, password: hashedPassword});
+
+    res.status(201).json({message: "PostPartum user registered successfully", success: true, data: postPartumUser});
+
+  }catch(err){
+    res.status(500).json({message: "Internal Server Error", success: false, error: err.message})
+  }
+}
+
 // === Login ===
 export const loginUser = async (req, res) => {
   try {
@@ -73,6 +95,30 @@ export const loginUser = async (req, res) => {
     res.status(500).json({ success: false, error: "Internal server error" });
   }
 };
+
+export const postPartumLogin = async (req, res) => {
+  try{
+    const {email, password} = req.body;
+    if(!email || !password) return res.status(400).json({error: "email and password are required"});
+
+    const user = await PostPartum.findOne({email});
+    if(!user) return res.status(401).json({error: "Invalid email or password"});
+    const passwordMatches = bcrypt.compareSync(password, user.password);
+    if(!passwordMatches) return res.status(401).json({error: "Invalid email or password"});
+
+    const accessToken = generateToken({userId: user._id});
+    res.cookie("token", accessToken, COOKIE_OPTIONS);
+
+    // Update lastLogin
+    user.lastLogin = new Date();
+    await user.save();
+    res.status(200).json({message: "Login successful", success: true, token: accessToken});
+    
+  }catch(err){
+    res.status(500).json({message: "Internal Server Error", success: false, error: err.message})
+  }
+}
+
 
 // === Request Password Reset (Send OTP) ===
 export const requestPasswordReset = async (req, res) => {
@@ -156,3 +202,11 @@ export const getCurrentUser = async (req, res) => {
     res.status(500).json({success: false, error: err.message});
   }
 }
+
+
+
+
+
+
+
+

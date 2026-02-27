@@ -1,5 +1,5 @@
 import Antenatal from "../models/antenatal.js";
-import User from "../models/user.js";
+import {User} from "../models/user.js";
 import { groq } from "@ai-sdk/groq";
 import { generateText } from "ai";
 import { getLang } from "./chatController.js";
@@ -102,3 +102,8 @@ export const createAntenatalUpdate = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
+
+// ===================================== POST PARTUM DASHBOARD ENDPOINT ===========================================
+
+

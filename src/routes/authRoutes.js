@@ -1,7 +1,9 @@
 import express from "express";
 import {
   loginUser,
+  postPartumLogin,
   signUp,
+  postPartumSignUp,
   logoutUser,
   requestPasswordReset,
   verifyOTPAndResetPassword,
@@ -18,5 +20,11 @@ router.post("/login", loginUser);
 router.post("/logout", protectRoute, logoutUser);
 router.post("/reset", requestPasswordReset);
 router.post("/verify", verifyOTPAndResetPassword);
+
+// postpartum auth routes
+
+router.post("/postpartum/register", postPartumSignUp);
+router.post("/postpartum/login", postPartumLogin);
+
 
 export default router;

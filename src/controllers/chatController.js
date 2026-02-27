@@ -1,7 +1,7 @@
 import { groq } from "@ai-sdk/groq";
 import { streamText, generateText } from "ai";
 import Message from "../models/message.js";
-import User from "../models/user.js";
+import {User} from "../models/user.js";
 
 // Safety net for dangerous responses
 function safeResponse(text) {

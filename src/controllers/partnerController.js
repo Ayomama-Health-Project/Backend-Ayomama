@@ -18,7 +18,6 @@ export const createInvite = async (req, res) => {
     });
 
     const inviteLink = `https://backend-ayomama.onrender.com/partner?token=${token}`;
-    // const inviteLink = `https://ayomama.vercel.app/partner-invite?token=${token}`;
     res.status(201).json({ inviteLink });
   } catch (err) {
     console.error(err);

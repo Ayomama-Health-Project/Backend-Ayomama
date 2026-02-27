@@ -1,7 +1,8 @@
 import { decodeToken } from '../utils/jwt.js'
 import dotenv from 'dotenv'
-import User from '../models/user.js'
+import {User, PostPartum} from '../models/user.js'
 import CHW from '../models/Chw.js'
+import { requestPasswordReset } from '../controllers/authController.js'
 
 dotenv.config()
 
@@ -12,7 +13,7 @@ const authMiddleware = (req, res, next) => {
     let token;
     if (authHeader){
         token = authHeader.split(" ")[1];
-        // console.log(token);
+        
     };
 
     if (!token){
@@ -43,25 +44,35 @@ export async function protectRoute(req, res, next) {
     let decoded;
     try {
       decoded = decodeToken(token);
+      console.log("Decoded token:", decoded);
     } catch (err) {
       return res.status(401).json({ message: 'Token expired or invalid', success: false });
     }
 
     const user = await User.findById(decoded.userId).select('-password');
-    if (!user) {
+    
+    const postPartumUser = await PostPartum.findById(decoded.userId).select('-password');
+    
+    if (!user && !postPartumUser) {
       return res.status(401).json({ message: 'User not found', success: false });
     }
-
-    req.user = user;
+    
+    if (user) {
+      req.user = user;
+    } else {
+      req.user = postPartumUser;
+    }
+    // req.user = user;
     return next();
   } catch (err) {
-    return res.status(500).json({ message: 'Internal server error', success: false });
+    return res.status(500).json({ message: 'Internal server error', success: false, error: err.message});
   }
 }
 
 
 export async function protectCHW(req, res, next) {
   try {
+    console.log(req)
     const token = req.cookies?.token || req.headers?.authorization?.split(" ")[1];
 
     if (!token) {
