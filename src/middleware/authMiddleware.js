@@ -2,7 +2,6 @@ import { decodeToken } from '../utils/jwt.js'
 import dotenv from 'dotenv'
 import {User, PostPartum} from '../models/user.js'
 import CHW from '../models/Chw.js'
-import { requestPasswordReset } from '../controllers/authController.js'
 
 dotenv.config()
 

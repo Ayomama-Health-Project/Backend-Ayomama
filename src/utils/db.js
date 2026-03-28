@@ -6,13 +6,14 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 //mongoDb database connection setup
-const connectDB =() =>{
-    mongoose.connect(process.env.MONGO_URI) //mongo url
-    try {
-        console.log('MongoDB connected successfully')
-    } catch (error) {
-        console.log('MongoDB connection failed', {error: error.message})
-    }
-}
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log("MongoDB connected successfully");
+  } catch (error) {
+    console.log("MongoDB connection failed", { error: error.message });
+    throw error;
+  }
+};
 
 export default connectDB;

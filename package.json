@@ -5,8 +5,9 @@
   "main": "src/server.js",
   "type": "module",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "seed:auth": "node src/scripts/seedAuth.js"
   },
   "dependencies": {
     "@ai-sdk/groq": "^2.0.22",
@@ -23,6 +24,7 @@
     "nodemailer": "^7.0.6",
     "opencage-api-client": "^2.0.1",
     "request": "^2.88.2",
+    "swagger-ui-express": "^5.0.1",
     "twilio": "^5.10.2"
   },
   "devDependencies": {
