@@ -150,10 +150,12 @@ async function main() {
 
   try {
     const answer = await rl.question(
-      `Connected to ${env.mongoUri}. Type "RESET" to clear auth collections and seed default accounts: `,
+      `Connected to ${env.mongoUri}. Clear auth collections and seed default accounts? (y/N): `,
     );
 
-    if (answer !== "RESET") {
+    const normalizedAnswer = answer.trim().toLowerCase();
+
+    if (normalizedAnswer !== "y" && normalizedAnswer !== "yes") {
       console.log("Aborted.");
       process.exit(0);
     }
