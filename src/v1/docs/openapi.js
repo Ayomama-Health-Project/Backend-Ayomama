@@ -60,6 +60,26 @@ export function buildOpenApiSpec() {
         name: "Admin",
         description: "Admin and super admin authentication and admin-account management endpoints.",
       },
+      {
+        name: "Dashboard",
+        description: "Dashboard summary, development context, and checklist endpoints.",
+      },
+      {
+        name: "Visits",
+        description: "Appointment and visit reminder endpoints for mothers and linked partners.",
+      },
+      {
+        name: "Emergency",
+        description: "Nearby hospital lookup using device coordinates.",
+      },
+      {
+        name: "Chat",
+        description: "AYOMAMA smart chat history, streaming response, and clear-chat endpoints.",
+      },
+      {
+        name: "Blogs",
+        description: "Published blog reading endpoints for mobile plus admin blog management endpoints.",
+      },
     ],
     components: {
       securitySchemes: {
@@ -818,6 +838,41 @@ export function buildOpenApiSpec() {
           },
         },
       },
+      "/me/mother-type": {
+        patch: {
+          tags: ["Me"],
+          summary: "Switch mother account type",
+          description:
+            "Move a mother account between pregnant and postpartum mode while preserving history and restarting the correct onboarding flow.",
+          operationId: "me_patch_mother_type",
+          security: [{ bearerAuth: [] }],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  required: ["motherType"],
+                  properties: {
+                    motherType: {
+                      type: "string",
+                      enum: ["pregnant", "postpartum"],
+                    },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            200: successResponse(
+              "Mother type updated successfully.",
+              { $ref: "#/components/schemas/AccountResponse" },
+              "Mother type updated successfully.",
+            ),
+            403: problemResponse("Forbidden."),
+          },
+        },
+      },
       "/me/onboarding": {
         patch: {
           tags: ["Me"],
@@ -841,6 +896,206 @@ export function buildOpenApiSpec() {
               "Onboarding updated successfully.",
             ),
             422: problemResponse("Validation failed."),
+          },
+        },
+      },
+      "/dashboard/summary": {
+        get: {
+          tags: ["Dashboard"],
+          summary: "Fetch dashboard summary",
+          description:
+            "Return the normalized mother or linked-partner dashboard summary, including development, checklist, reminders, nutrition, journal previews, and the next appointment.",
+          operationId: "dashboard_summary",
+          security: [{ bearerAuth: [] }],
+          responses: {
+            200: successResponse(
+              "Dashboard summary loaded successfully.",
+              { type: "object", additionalProperties: true },
+              "Dashboard summary loaded successfully.",
+            ),
+            403: problemResponse("Forbidden."),
+          },
+        },
+      },
+      "/dashboard/checklist/{itemId}/toggle": {
+        patch: {
+          tags: ["Dashboard"],
+          summary: "Toggle a checklist item",
+          description: "Toggle a mother-owned dashboard checklist item.",
+          operationId: "dashboard_toggle_checklist",
+          security: [{ bearerAuth: [] }],
+          parameters: [
+            {
+              name: "itemId",
+              in: "path",
+              required: true,
+              schema: { type: "string" },
+            },
+          ],
+          responses: {
+            200: successResponse(
+              "Checklist item updated successfully.",
+              { type: "object", additionalProperties: true },
+              "Checklist item updated successfully.",
+            ),
+            403: problemResponse("Forbidden."),
+          },
+        },
+      },
+      "/visits": {
+        get: {
+          tags: ["Visits"],
+          summary: "List visits",
+          description: "Return upcoming and historical visits for a mother or her linked partner.",
+          operationId: "visits_list",
+          security: [{ bearerAuth: [] }],
+          responses: {
+            200: successResponse(
+              "Visits loaded successfully.",
+              { type: "array", items: { type: "object", additionalProperties: true } },
+              "Visits loaded successfully.",
+            ),
+          },
+        },
+        post: {
+          tags: ["Visits"],
+          summary: "Create a visit reminder",
+          description: "Create a visit reminder for the authenticated mother account.",
+          operationId: "visits_create",
+          security: [{ bearerAuth: [] }],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: { type: "object", additionalProperties: true },
+              },
+            },
+          },
+          responses: {
+            201: successResponse(
+              "Visit created successfully.",
+              { type: "object", additionalProperties: true },
+              "Visit created successfully.",
+            ),
+            403: problemResponse("Forbidden."),
+          },
+        },
+      },
+      "/emergency/hospitals": {
+        get: {
+          tags: ["Emergency"],
+          summary: "Find nearby hospitals",
+          description:
+            "Query nearby hospitals and clinics using device coordinates and OpenStreetMap/Overpass.",
+          operationId: "emergency_hospitals",
+          security: [{ bearerAuth: [] }],
+          parameters: [
+            { name: "latitude", in: "query", required: true, schema: { type: "number" } },
+            { name: "longitude", in: "query", required: true, schema: { type: "number" } },
+          ],
+          responses: {
+            200: successResponse(
+              "Nearby hospitals loaded successfully.",
+              { type: "array", items: { type: "object", additionalProperties: true } },
+              "Nearby hospitals loaded successfully.",
+            ),
+          },
+        },
+      },
+      "/chat/messages": {
+        get: {
+          tags: ["Chat"],
+          summary: "List chat history",
+          security: [{ bearerAuth: [] }],
+          responses: {
+            200: successResponse(
+              "Chat history loaded successfully.",
+              { type: "array", items: { type: "object", additionalProperties: true } },
+              "Chat history loaded successfully.",
+            ),
+          },
+        },
+        post: {
+          tags: ["Chat"],
+          summary: "Send a chat message",
+          description:
+            "Create a user chat message and return an assistant response. Use `Accept: text/event-stream` or `?stream=true` to stream chunked output.",
+          security: [{ bearerAuth: [] }],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  required: ["content"],
+                  properties: {
+                    content: { type: "string" },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            200: successResponse(
+              "Chat response created successfully.",
+              { type: "object", additionalProperties: true },
+              "Chat response created successfully.",
+            ),
+          },
+        },
+        delete: {
+          tags: ["Chat"],
+          summary: "Clear chat history",
+          security: [{ bearerAuth: [] }],
+          responses: {
+            200: successResponse("Chat cleared successfully.", { nullable: true }, "Chat cleared successfully."),
+          },
+        },
+      },
+      "/blogs": {
+        get: {
+          tags: ["Blogs"],
+          summary: "List published blogs",
+          responses: {
+            200: successResponse(
+              "Blogs loaded successfully.",
+              { type: "array", items: { type: "object", additionalProperties: true } },
+              "Blogs loaded successfully.",
+            ),
+          },
+        },
+      },
+      "/blogs/admin": {
+        get: {
+          tags: ["Blogs"],
+          summary: "List all blogs for admins",
+          security: [{ bearerAuth: [] }],
+          responses: {
+            200: successResponse(
+              "Admin blogs loaded successfully.",
+              { type: "array", items: { type: "object", additionalProperties: true } },
+              "Admin blogs loaded successfully.",
+            ),
+          },
+        },
+        post: {
+          tags: ["Blogs"],
+          summary: "Create a blog post",
+          security: [{ bearerAuth: [] }],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: { type: "object", additionalProperties: true },
+              },
+            },
+          },
+          responses: {
+            201: successResponse(
+              "Blog created successfully.",
+              { type: "object", additionalProperties: true },
+              "Blog created successfully.",
+            ),
           },
         },
       },

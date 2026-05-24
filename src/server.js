@@ -1,21 +1,26 @@
+import http from "http";
 import express from "express";
 import connectDB from "./utils/db.js";
-import visitRoutes from "./routes/visitRoutes.js";
-import userRoutes from "./routes/userRoutes.js";
-import reminderRoutes from "./routes/reminderRoutes.js";
-import chatRoutes from "./routes/chatRoutes.js";
-import hospitalRoutes from "./routes/hospitalRoute.js";
-import antenatalRoutes from "./routes/antenatalRoute.js";
-import patientRoutes from './routes/patientRoutes.js';
 import v1Routes from "./v1/routes/index.js";
 import docsRoutes from "./v1/routes/docsRoutes.js";
 
 import "./jobs/reminderJobs.js";
 import cookieParser from "cookie-parser";
 import { env } from "./config/env.js";
+import { setSocketServer } from "./realtime/socketServer.js";
+import { verifyAccessToken } from "./utils/authTokens.js";
+import Account from "./models/Account.js";
 
 const app = express();
 const port = env.port;
+const server = http.createServer(app);
+let SocketIOServer = null;
+
+try {
+  ({ Server: SocketIOServer } = await import("socket.io"));
+} catch (_error) {
+  console.warn("socket.io is not installed yet. Realtime features are temporarily disabled.");
+}
 
 const PROBLEM_PAGE_CONTENT = {
   "account-not-found": {
@@ -118,16 +123,8 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(cookieParser());
 
-console.info(">>>  This is for Testing")
 connectDB();
 
-app.use("/api/visit", visitRoutes);
-app.use("/api/user", userRoutes);
-app.use("/api/reminder", reminderRoutes);
-app.use("/api/chat", chatRoutes);
-app.use("/api/hospitals", hospitalRoutes);
-app.use("/api/antenatal", antenatalRoutes);
-app.use("/api/patient", patientRoutes);
 app.use("/api/v1/docs", docsRoutes);
 app.use("/api/v1", v1Routes);
 
@@ -240,7 +237,53 @@ app.get("/", (req, res) => {
   res.send({ message: "This is ayomama backend" });
 });
 
-app.listen(port, (req, res) => {
+if (SocketIOServer) {
+  const io = new SocketIOServer(server, {
+    cors: {
+      origin: [env.frontendUrl, env.adminUrl],
+      credentials: true,
+    },
+  });
+
+  io.use(async (socket, next) => {
+    try {
+      const token =
+        socket.handshake.auth?.token ||
+        socket.handshake.headers?.authorization?.replace("Bearer ", "");
+      if (!token) {
+        return next(new Error("Unauthorized"));
+      }
+
+      const payload = verifyAccessToken(token);
+      const account = await Account.findById(payload.sub);
+      if (!account) {
+        return next(new Error("Unauthorized"));
+      }
+
+      socket.data.account = account;
+      return next();
+    } catch (_error) {
+      return next(new Error("Unauthorized"));
+    }
+  });
+
+  io.on("connection", async (socket) => {
+    const account = socket.data.account;
+    const accountRoom = `account:${account._id.toString()}`;
+    socket.join(accountRoom);
+
+    if (account.role === "mother") {
+      socket.join(`mother:${account._id.toString()}`);
+      socket.join(`partner-link:${account._id.toString()}`);
+    }
+  });
+
+  setSocketServer(io);
+} else {
+  setSocketServer(null);
+}
+
+server.listen(port, () => {
   console.log(`server running on http://localhost:${port}`);
 });
 

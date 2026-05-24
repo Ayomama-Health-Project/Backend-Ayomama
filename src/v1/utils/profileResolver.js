@@ -3,6 +3,7 @@ import HealthWorkerProfile from "../../models/HealthWorkerProfile.js";
 import MotherProfile from "../../models/MotherProfile.js";
 import NotificationToken from "../../models/NotificationToken.js";
 import PartnerProfile from "../../models/PartnerProfile.js";
+import { buildMotherContext } from "./motherContext.js";
 
 export async function getProfileForAccount(account) {
   switch (account.role) {
@@ -21,9 +22,10 @@ export async function getProfileForAccount(account) {
 }
 
 export async function serializeAccount(account) {
-  const [profile, notificationTokens] = await Promise.all([
+  const [profile, notificationTokens, motherContext] = await Promise.all([
     getProfileForAccount(account),
     NotificationToken.find({ account: account._id, enabled: true }).lean(),
+    buildMotherContext(account),
   ]);
 
   return {
@@ -44,6 +46,7 @@ export async function serializeAccount(account) {
     motherType: account.motherType,
     healthWorkerType: account.healthWorkerType,
     profile,
+    motherContext,
     notifications: {
       enabled: notificationTokens.length > 0,
       tokens: notificationTokens.map((token) => ({

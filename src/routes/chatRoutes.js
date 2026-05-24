@@ -1,9 +1,0 @@
-import { Router } from "express";
-import { chatWithAi } from "../controllers/chatController.js";
-import { protectRoute } from "../middleware/authMiddleware.js";
-
-const router = Router();
-
-router.post("/", protectRoute, chatWithAi);
-
-export default router;

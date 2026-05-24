@@ -123,6 +123,12 @@ export const patchLanguageSchema = z.object({
   }),
 });
 
+export const patchMotherTypeSchema = z.object({
+  body: z.object({
+    motherType: z.enum(["pregnant", "postpartum"]),
+  }),
+});
+
 export const patchOnboardingSchema = z.object({
   body: z.object({
     onboardingCompleted: z.boolean(),

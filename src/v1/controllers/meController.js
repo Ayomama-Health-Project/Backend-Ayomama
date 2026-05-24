@@ -1,10 +1,13 @@
 import bcrypt from "bcryptjs";
+import Appointment from "../../models/Appointment.js";
+import BlogPost from "../../models/BlogPost.js";
 import HealthWorkerProfile from "../../models/HealthWorkerProfile.js";
 import MotherProfile from "../../models/MotherProfile.js";
 import NotificationToken from "../../models/NotificationToken.js";
 import PartnerProfile from "../../models/PartnerProfile.js";
 import { sendProblem, sendSuccess } from "../../utils/problem.js";
 import { serializeAccount } from "../utils/profileResolver.js";
+import { buildMotherContext, getLinkedMotherAccountId } from "../utils/motherContext.js";
 
 export async function patchProfile(req, res) {
   const payload = req.validated.body;
@@ -91,6 +94,38 @@ export async function patchLanguage(req, res) {
   });
 }
 
+export async function patchMotherType(req, res) {
+  if (req.account.role !== "mother") {
+    return sendProblem(res, req, {
+      type: "/problems/forbidden",
+      title: "Forbidden",
+      status: 403,
+      detail: "Only mother accounts can change mother type.",
+      errors: [{ field: "role", code: "mother_only" }],
+    });
+  }
+
+  const { motherType } = req.validated.body;
+  req.account.motherType = motherType;
+  req.account.onboardingCompleted = false;
+  req.account.status = "pending_onboarding";
+  req.account.onboardingProgress = {
+    flow:
+      motherType === "postpartum"
+        ? "mother_postpartum_onboarding"
+        : "mother_pregnant_onboarding",
+    currentStep: 0,
+    draft: {},
+    updatedAt: new Date(),
+  };
+  await req.account.save();
+
+  return sendSuccess(res, {
+    message: "Mother type updated successfully.",
+    data: await serializeAccount(req.account),
+  });
+}
+
 export async function patchOnboarding(req, res) {
   const {
     onboardingCompleted,
@@ -164,6 +199,94 @@ export async function createNotificationToken(req, res) {
       expoPushToken: token.expoPushToken,
       deviceId: token.deviceId,
       enabled: token.enabled,
+    },
+  });
+}
+
+export async function getNotificationFeed(req, res) {
+  const context = await buildMotherContext(req.account);
+  const motherAccountId = await getLinkedMotherAccountId(req.account);
+  const [nextAppointment, latestBlog] = await Promise.all([
+    motherAccountId
+      ? Appointment.findOne({
+          ownerMotherAccount: motherAccountId,
+          status: "scheduled",
+          scheduledFor: { $gte: new Date() },
+        })
+          .sort({ scheduledFor: 1 })
+          .lean()
+      : null,
+    BlogPost.findOne({ status: "published" }).sort({ publishedAt: -1 }).lean(),
+  ]);
+
+  const notifications = [];
+
+  if (context?.medicationReminders?.length) {
+    context.medicationReminders
+      .filter((item) => item.enabled)
+      .slice(0, 2)
+      .forEach((item, index) => {
+        notifications.push({
+          id: `reminder-${index}-${item.title}`,
+          icon: "medical",
+          title: req.account.role === "partner" ? "Partner Reminder" : "Medication Reminder",
+          message:
+            req.account.role === "partner"
+              ? `Help remind her about ${item.title} around ${item.timeLabel}.`
+              : `${item.title} is scheduled for ${item.timeLabel}.`,
+          createdAt: new Date(),
+          type: "reminder",
+        });
+      });
+  }
+
+  if (nextAppointment) {
+    notifications.push({
+      id: `appointment-${nextAppointment._id}`,
+      icon: "calendar",
+      title: "Clinic Visit",
+      message:
+        req.account.role === "partner"
+          ? `Her ${nextAppointment.serviceType} is coming up at ${nextAppointment.hospitalName}.`
+          : `Your ${nextAppointment.serviceType} is coming up at ${nextAppointment.hospitalName}.`,
+      createdAt: nextAppointment.createdAt || nextAppointment.scheduledFor,
+      type: "visit",
+    });
+  }
+
+  if (context?.checklistItems?.length) {
+    const pendingChecklist = context.checklistItems.find((item) => !item.completed);
+    if (pendingChecklist) {
+      notifications.push({
+        id: `checklist-${pendingChecklist.itemId}`,
+        icon: pendingChecklist.iconKey === "water" ? "water" : pendingChecklist.iconKey === "clinic" ? "calendar" : "walk",
+        title: req.account.role === "partner" ? "Support Nudge" : "Daily Routine",
+        message:
+          req.account.role === "partner"
+            ? `A gentle check-in on "${pendingChecklist.label}" could really help today.`
+            : `Don't forget to complete "${pendingChecklist.label}" today.`,
+        createdAt: new Date(),
+        type: "checklist",
+      });
+    }
+  }
+
+  if (latestBlog) {
+    notifications.push({
+      id: `blog-${latestBlog._id}`,
+      icon: "heart",
+      title: "New Blog Story",
+      message: latestBlog.title,
+      createdAt: latestBlog.publishedAt || latestBlog.createdAt || new Date(),
+      type: "blog",
+    });
+  }
+
+  return sendSuccess(res, {
+    message: "Notifications loaded successfully.",
+    data: {
+      items: notifications,
+      notificationsEnabled: Boolean(req.account.notifications?.enabled) || false,
     },
   });
 }

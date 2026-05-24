@@ -20,6 +20,7 @@ export const env = {
   refreshTokenTtl: process.env.JWT_REFRESH_TTL || "30d",
   frontendUrl: process.env.FRONTEND_URL || "http://localhost:8081",
   adminUrl: process.env.ADMIN_URL || "http://localhost:3001",
+  groqApiKey: process.env.GROQ_API_KEY || "",
   brevoFromEmail: process.env.BREVO_FROM_EMAIL,
   brevoFromName: process.env.BREVO_FROM_NAME,
   brevoApiKey: process.env.BREVO_FROM_API_KEY,
