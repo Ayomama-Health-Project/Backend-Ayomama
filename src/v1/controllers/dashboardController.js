@@ -5,6 +5,9 @@ import Appointment from "../../models/Appointment.js";
 import { sendProblem, sendSuccess } from "../../utils/problem.js";
 import { buildMotherContext, getLinkedMotherAccountId } from "../utils/motherContext.js";
 
+import HealthWorkerProfile from "../../models/healthWorkerProfile.js";
+
+
 function getDisplayName(account, profile) {
   if (profile?.fullName) return profile.fullName;
   return account.email.split("@")[0];
@@ -190,3 +193,27 @@ export async function updateDashboardState(req, res) {
     data: context,
   });
 }
+
+// ================================ DashBoard Controller for Health Workers ================================
+
+// export async function getHealthWorkerDashboard(req, res) {
+//   const healthWorkerAccountId = req.account._id;
+//   const healthWorkerProfile = await HealthWorkerProfile.findOne({ account: healthWorkerAccountId }).lean();
+
+//   if (!healthWorkerProfile) {
+//     return sendProblem(res, req, {
+//       type: "/problems/not-found",
+//       title: "Health worker profile not found",
+//       status: 404,
+//       detail: "The health worker profile for the current account was not found.",
+//       errors: [{ field: "account", code: "health_worker_profile_not_found" }],
+//     });
+//   }
+
+
+
+//   return sendSuccess(res, {
+//     message: "Health worker dashboard loaded successfully.",
+//     data: {...healthWorkerProfile },
+//   });
+// }
