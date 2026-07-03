@@ -1,0 +1,1 @@
+{"type":"http://localhost:3000/problems/unauthorized","title":"Unauthorized","status":401,"detail":"Your session is invalid or expired.","instance":"/api/v1/healthworker/patients/6a478f045d6c12706f1c89dc/visits","errors":[{"field":"authorization","code":"invalid_token"}]}

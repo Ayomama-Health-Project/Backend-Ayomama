@@ -6,6 +6,117 @@ function successResponseSchema(dataSchema, messageExample) {
         type: "string",
         example: messageExample || "Request completed successfully.",
       },
+      "/healthworker/patients": {
+        post: {
+          tags: ["Dashboard"],
+          summary: "Create a patient (health worker)",
+          description: "Health workers can create a patient record linked to their profile.",
+          security: [{ bearerAuth: [] }],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    name: { type: "string" },
+                    contact: { type: "string" },
+                    pregnancyStage: { type: "string" },
+                    patientVisitDate: { type: "string", format: "date-time" },
+                    antinentalVisitDate: { type: "string", format: "date-time" },
+                  },
+                  required: ["name", "contact"],
+                },
+              },
+            },
+          },
+          responses: {
+            201: successResponse("Patient created.", { type: "object", properties: { id: { type: "string" } } }, "Patient created successfully."),
+            401: problemResponse("Unauthorized"),
+            422: problemResponse("Invalid payload"),
+          },
+        },
+      },
+      "/healthworker/patients/{patientId}/healthlogs": {
+        post: {
+          tags: ["Dashboard"],
+          summary: "Add health log for a patient",
+          description: "Health worker adds vitals and risk status for a patient visit.",
+          security: [{ bearerAuth: [] }],
+          parameters: [
+            { name: "patientId", in: "path", required: true, schema: { type: "string" } },
+          ],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    temperature: { type: "number" },
+                    weight: { type: "number" },
+                    bloodLevel: { type: "number" },
+                    bloodPressure: { type: "string" },
+                    riskStatus: { type: "string", enum: ["safe", "monitor", "urgent"] },
+                    medicalHistory: { type: "string" },
+                    visitDate: { type: "string", format: "date-time" },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            201: successResponse("Health log added.", { type: "object", properties: { id: { type: "string" } } }, "Health log created."),
+            401: problemResponse("Unauthorized"),
+            404: problemResponse("Patient not found"),
+          },
+        },
+      },
+      "/healthworker/patients/{patientId}/visits": {
+        post: {
+          tags: ["Dashboard"],
+          summary: "Log a CHW visit",
+          description: "Log a community health worker visit; this also creates an Appointment and sends a notification.",
+          security: [{ bearerAuth: [] }],
+          parameters: [
+            { name: "patientId", in: "path", required: true, schema: { type: "string" } },
+          ],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    visitDate: { type: "string", format: "date-time" },
+                    antinentalVisitDate: { type: "string", format: "date-time" },
+                    contact: { type: "string" },
+                    durationMinutes: { type: "integer" },
+                    notes: { type: "string" },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            201: successResponse("CHW visit logged.", { type: "object", properties: { id: { type: "string" } } }, "Visit logged."),
+            401: problemResponse("Unauthorized"),
+            404: problemResponse("Patient not found"),
+          },
+        },
+      },
+      "/healthworker/upcoming": {
+        get: {
+          tags: ["Dashboard"],
+          summary: "Get next 3 upcoming visits and appointments for the health worker",
+          description: "Returns the next three upcoming Visit or Appointment records for patients linked to the health worker.",
+          security: [{ bearerAuth: [] }],
+          responses: {
+            200: successResponse("Upcoming loaded.", { type: "array", items: { type: "object" } }, "Upcoming visits loaded."),
+            401: problemResponse("Unauthorized"),
+          },
+        },
+      },
       data: dataSchema,
     },
   };

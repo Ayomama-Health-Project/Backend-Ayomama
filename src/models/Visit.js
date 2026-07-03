@@ -29,6 +29,14 @@ const visitSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    linkedPatient: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Patient",
+    },
+    visitCompleted: {
+      type: Boolean,
+      default: false,
+    }
   },
   { timestamps: true, versionKey: false }
 );
