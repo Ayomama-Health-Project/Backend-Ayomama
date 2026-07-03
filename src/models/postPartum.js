@@ -120,3 +120,81 @@ const babySchema = new mongoose.Schema({
 }, {timestamps: true, versionKey: false});
 
 export const Baby = mongoose.model("Baby", babySchema);
+
+// PostPartum model (migrated from src/models/user.js)
+const postPartumSchema = new mongoose.Schema(
+    {
+        name: {
+            type: String,
+            required: true,
+        },
+        email: {
+            type: String,
+            required: true,
+            unique: true,
+        },
+        password: {
+            type: String,
+            required: true,
+        },
+        address: {
+            type: String,
+            required: false,
+        },
+        emergencyContact: [
+            {
+                name: {
+                    type: String,
+                    default: "",
+                },
+                phoneNumber: {
+                    type: String,
+                    default: "",
+                },
+                relationship: {
+                    type: String,
+                    default: "",
+                },
+            },
+        ],
+        babyAge: {
+            type: String,
+            required: false,
+        },
+        babyDateOfBirth: {
+            type: Date,
+            default: null,
+            required: false,
+        },
+        babyBirthHospital: {
+            type: String,
+            default: "",
+            required: false,
+        },
+        babyImmunization: {
+            type: Boolean,
+            required: false,
+        },
+        healthConcerns: {
+            type: String,
+            default: "",
+            required: false,
+        },
+        BirthWeight: {
+            type: String,
+            required: false,
+        },
+        babyNickname: {
+            type: String,
+            default: "",
+            required: false,
+        },
+        lastLogin: {
+            type: Date,
+            default: null,
+        },
+    },
+    { timestamps: true, versionKey: false }
+);
+
+export const PostPartum = mongoose.models.PostPartum || mongoose.model("PostPartum", postPartumSchema);
