@@ -3,6 +3,7 @@ import HealthLog from "../../models/healthlogs.js";
 import CHWVisit from "../../models/chwVisit.js";
 import Visit from "../../models/Visit.js";
 import Appointment from "../../models/Appointment.js";
+import MotherProfile from "../../models/MotherProfile.js";
 import HealthWorkerProfile from "../../models/HealthWorkerProfile.js";
 import { sendProblem, sendSuccess } from "../../utils/problem.js";
 import { sendPushNotificationToAccounts } from "../../utils/pushNotifications.js";
@@ -142,10 +143,21 @@ export async function logCHWVisit(req, res) {
   patient.visits.push(visit._id);
   await patient.save();
 
-  // Create an Appointment entry so it appears in scheduled appointments
+  // Determine ownerMotherAccount: prefer linked mother account when available
+  let ownerMotherAccount = null;
+  try {
+    // try to find a mother profile by patient contact
+    const linkedMother = await MotherProfile.findOne({ phoneNumber: patient.contact }).lean();
+    if (linkedMother?.account) {
+      ownerMotherAccount = linkedMother.account;
+    }
+  } catch (e) {
+    ownerMotherAccount = null;
+  }
+
   const appt = await Appointment.create({
     account: req.account._id,
-    ownerMotherAccount: req.account._id,
+    ownerMotherAccount: ownerMotherAccount || req.account._id,
     serviceType: "CHW Visit",
     hospitalName: hwProfile.facilityName || "",
     healthcareProvider: hwProfile.fullName || "",
