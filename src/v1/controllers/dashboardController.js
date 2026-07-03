@@ -9,7 +9,6 @@ import HealthWorkerProfile from "../../models/healthWorkerProfile.js";
 import Patient from "../../models/patient.js";
 import CHWVisit from "../../models/chwVisit.js";
 import Visit from "../../models/Visit.js";
-import Appointment from "../../models/Appointment.js";
 import HealthLog from "../../models/healthlogs.js";
 
 
