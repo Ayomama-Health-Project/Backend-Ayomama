@@ -1,7 +1,7 @@
 import mongoose from 'mongoose'
 
 const chwSchema = new mongoose.Schema({
-    name: {
+    fullName: {
         type: String,
         required: false,
         default: ""
@@ -37,4 +37,6 @@ const chwSchema = new mongoose.Schema({
 {timestamp: true}
 )
 
-export default mongoose.model("CHW", chwSchema)
+const CHW = mongoose.models.CHW || mongoose.model("CHW", chwSchema)
+
+export default CHW
