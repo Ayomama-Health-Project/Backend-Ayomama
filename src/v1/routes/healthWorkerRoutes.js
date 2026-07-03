@@ -8,6 +8,7 @@ import {
   logCHWVisit,
   getUpcomingVisits,
 } from "../controllers/healthWorkerController.js";
+import { getHealthWorkerDashboardSummary } from "../controllers/dashboardController.js";
 
 const router = express.Router();
 
@@ -49,5 +50,6 @@ router.post("/patients", validateRequest(createPatientSchema), createPatient);
 router.post("/patients/:patientId/healthlogs", validateRequest(addHealthLogSchema), addHealthLog);
 router.post("/patients/:patientId/visits", validateRequest(logVisitSchema), logCHWVisit);
 router.get("/upcoming", getUpcomingVisits);
+router.get("/dashboard", getHealthWorkerDashboardSummary);
 
 export default router;
