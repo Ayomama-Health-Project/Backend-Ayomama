@@ -10,9 +10,12 @@ const healthWorkerProfileSchema = new mongoose.Schema(
     occupation: { type: String, default: "" },
     facilityName: { type: String, default: "" },
     facilityCode: { type: String, default: "" },
+<<<<<<< HEAD
 
     
     
+=======
+>>>>>>> 2c8c33590bf42a641246e23b634d5ded0711742a
   },
   { timestamps: true, versionKey: false },
 );

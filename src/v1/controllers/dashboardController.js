@@ -5,6 +5,7 @@ import Appointment from "../../models/Appointment.js";
 import { sendProblem, sendSuccess } from "../../utils/problem.js";
 import { buildMotherContext, getLinkedMotherAccountId } from "../utils/motherContext.js";
 
+<<<<<<< HEAD
 import HealthWorkerProfile from "../../models/healthWorkerProfile.js";
 import Patient from "../../models/patient.js";
 import CHWVisit from "../../models/chwVisit.js";
@@ -12,6 +13,8 @@ import Visit from "../../models/Visit.js";
 import HealthLog from "../../models/healthlogs.js";
 
 
+=======
+>>>>>>> 2c8c33590bf42a641246e23b634d5ded0711742a
 function getDisplayName(account, profile) {
   if (profile?.fullName) return profile.fullName;
   return account.email.split("@")[0];
@@ -197,6 +200,7 @@ export async function updateDashboardState(req, res) {
     data: context,
   });
 }
+<<<<<<< HEAD
 
 export async function getHealthWorkerDashboardSummary(req, res) {
   const hwProfile = await HealthWorkerProfile.findOne({ account: req.account._id }).lean();
@@ -268,3 +272,5 @@ export async function getHealthWorkerDashboardSummary(req, res) {
     },
   });
 }
+=======
+>>>>>>> 2c8c33590bf42a641246e23b634d5ded0711742a

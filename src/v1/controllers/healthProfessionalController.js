@@ -57,4 +57,7 @@ export async function listHealthProfessionals(req, res) {
     }),
   });
 }
+<<<<<<< HEAD
 
+=======
+>>>>>>> 2c8c33590bf42a641246e23b634d5ded0711742a
