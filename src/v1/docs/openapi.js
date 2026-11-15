@@ -69,6 +69,10 @@ export function buildOpenApiSpec() {
         description: "Appointment and visit reminder endpoints for mothers and linked partners.",
       },
       {
+        name: "Health Worker",
+        description: "Patient management, health logs, CHW visits, and dashboard endpoints for authenticated health workers.",
+      },
+      {
         name: "Emergency",
         description: "Nearby hospital lookup using device coordinates.",
       },
@@ -537,6 +541,105 @@ export function buildOpenApiSpec() {
             },
           },
         },
+        CreateHealthWorkerPatientInput: {
+          type: "object",
+          required: ["name", "contact"],
+          properties: {
+            name: { type: "string", minLength: 1, example: "Ada Obi" },
+            pregnancyStage: { type: "string" },
+            patientVisitDate: { type: "string", format: "date-time" },
+            antinentalVisitDate: { type: "string", format: "date-time" },
+            contact: { type: "string", minLength: 1, example: "+2348012345678" },
+          },
+        },
+        CreateHealthWorkerHealthLogInput: {
+          type: "object",
+          properties: {
+            pregnancyStage: { type: "string" },
+            visitDate: { type: "string", format: "date-time" },
+            riskStatus: {
+              type: "string",
+              enum: ["safe", "monitor", "urgent"],
+              default: "safe",
+            },
+            medicalHistory: { type: "string" },
+            temperature: { type: "number" },
+            weight: { type: "number" },
+            bloodLevel: { type: "number" },
+            bloodPressure: { type: "string" },
+          },
+        },
+        CreateHealthWorkerVisitInput: {
+          type: "object",
+          properties: {
+            visitDate: { type: "string", format: "date-time" },
+            antinentalVisitDate: { type: "string", format: "date-time" },
+            contact: { type: "string" },
+          },
+        },
+        HealthWorkerUpcomingVisit: {
+          type: "object",
+          properties: {
+            id: { type: "string", example: "67f0ab2f7c8bd3a5f8f64511" },
+            type: { type: "string", enum: ["visit", "appointment"] },
+            date: { type: "string", format: "date-time" },
+            title: { type: "string", nullable: true },
+            duration: { type: "number", nullable: true },
+            hospitalName: { type: "string", nullable: true },
+            linkedPatient: { type: "string", nullable: true },
+          },
+        },
+        HealthWorkerDashboardUpcomingItem: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            type: { type: "string", enum: ["visit", "appointment"] },
+            date: { type: "string", format: "date-time" },
+            title: { type: "string", nullable: true },
+            hospitalName: { type: "string", nullable: true },
+            linkedPatient: { type: "string", nullable: true },
+          },
+        },
+        HealthWorkerDashboardSummary: {
+          type: "object",
+          properties: {
+            viewerRole: { type: "string", example: "health_worker" },
+            healthWorker: {
+              type: "object",
+              properties: {
+                id: { type: "string" },
+                fullName: { type: "string" },
+                facilityName: { type: "string" },
+                facilityCode: { type: "string" },
+              },
+            },
+            totalPatients: { type: "integer", minimum: 0 },
+            recentVisits: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  id: { type: "string" },
+                  patientId: { type: "string" },
+                  visitDate: { type: "string", format: "date-time" },
+                  contact: { type: "string" },
+                },
+              },
+            },
+            upcoming: {
+              type: "array",
+              items: { $ref: "#/components/schemas/HealthWorkerDashboardUpcomingItem" },
+            },
+            riskCounts: {
+              type: "object",
+              properties: {
+                safe: { type: "integer", minimum: 0 },
+                monitor: { type: "integer", minimum: 0 },
+                urgent: { type: "integer", minimum: 0 },
+              },
+            },
+          },
+        },
         CreateAdminInput: {
           type: "object",
           required: ["email", "password", "fullName"],
@@ -939,6 +1042,153 @@ export function buildOpenApiSpec() {
               "Checklist item updated successfully.",
             ),
             403: problemResponse("Forbidden."),
+          },
+        },
+      },
+      "/healthworker/patients": {
+        post: {
+          tags: ["Health Worker"],
+          summary: "Create a patient",
+          description: "Create a patient record linked to the authenticated health worker.",
+          operationId: "healthworker_create_patient",
+          security: [{ bearerAuth: [] }],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/CreateHealthWorkerPatientInput" },
+              },
+            },
+          },
+          responses: {
+            201: successResponse(
+              "Patient created successfully.",
+              {
+                type: "object",
+                properties: {
+                  id: { type: "string" },
+                  name: { type: "string" },
+                },
+              },
+              "Patient created successfully.",
+            ),
+            401: problemResponse("Authentication required."),
+            403: problemResponse("Only health workers can create patients."),
+            404: problemResponse("Health worker profile not found."),
+            422: problemResponse("Validation failed."),
+          },
+        },
+      },
+      "/healthworker/patients/{patientId}/healthlogs": {
+        post: {
+          tags: ["Health Worker"],
+          summary: "Add a patient health log",
+          description: "Record pregnancy, risk, medical-history, and patient-measurement details for a patient.",
+          operationId: "healthworker_create_health_log",
+          security: [{ bearerAuth: [] }],
+          parameters: [
+            {
+              name: "patientId",
+              in: "path",
+              required: true,
+              schema: { type: "string" },
+            },
+          ],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/CreateHealthWorkerHealthLogInput" },
+              },
+            },
+          },
+          responses: {
+            201: successResponse(
+              "Health log added successfully.",
+              { type: "object", properties: { id: { type: "string" } } },
+              "Health log added successfully.",
+            ),
+            401: problemResponse("Authentication required."),
+            403: problemResponse("Only health workers can add health logs."),
+            404: problemResponse("Health worker profile or patient not found."),
+            422: problemResponse("Validation failed or riskStatus is invalid."),
+          },
+        },
+      },
+      "/healthworker/patients/{patientId}/visits": {
+        post: {
+          tags: ["Health Worker"],
+          summary: "Log a CHW visit",
+          description: "Record a community health worker visit for a patient and create its scheduled appointment.",
+          operationId: "healthworker_create_visit",
+          security: [{ bearerAuth: [] }],
+          parameters: [
+            {
+              name: "patientId",
+              in: "path",
+              required: true,
+              schema: { type: "string" },
+            },
+          ],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/CreateHealthWorkerVisitInput" },
+              },
+            },
+          },
+          responses: {
+            201: successResponse(
+              "CHW visit logged successfully.",
+              { type: "object", properties: { id: { type: "string" } } },
+              "CHW visit logged successfully.",
+            ),
+            401: problemResponse("Authentication required."),
+            403: problemResponse("Only health workers can log visits."),
+            404: problemResponse("Health worker profile or patient not found."),
+            422: problemResponse("Validation failed."),
+          },
+        },
+      },
+      "/healthworker/upcoming": {
+        get: {
+          tags: ["Health Worker"],
+          summary: "Get upcoming visits",
+          description: "Return up to three upcoming patient visits and scheduled appointments for the authenticated health worker.",
+          operationId: "healthworker_list_upcoming_visits",
+          security: [{ bearerAuth: [] }],
+          responses: {
+            200: successResponse(
+              "Upcoming visits loaded.",
+              {
+                type: "array",
+                items: { $ref: "#/components/schemas/HealthWorkerUpcomingVisit" },
+              },
+              "Upcoming visits loaded.",
+            ),
+            401: problemResponse("Authentication required."),
+            403: problemResponse("Only health workers can view upcoming visits."),
+            404: problemResponse("Health worker profile not found."),
+          },
+        },
+      },
+      "/healthworker/dashboard": {
+        get: {
+          tags: ["Health Worker"],
+          summary: "Get health worker dashboard",
+          description: "Return patient totals, recent CHW visits, upcoming events, and patient risk counts for the authenticated health worker.",
+          operationId: "healthworker_dashboard_summary",
+          security: [{ bearerAuth: [] }],
+          responses: {
+            200: successResponse(
+              "Health worker dashboard loaded.",
+              { $ref: "#/components/schemas/HealthWorkerDashboardSummary" },
+              "Health worker dashboard loaded.",
+            ),
+            401: problemResponse("Authentication required."),
+            403: problemResponse("Only health workers can view this dashboard."),
+            404: problemResponse("Health worker profile not found."),
           },
         },
       },
